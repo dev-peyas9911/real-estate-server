@@ -13,7 +13,7 @@ app.get('/', (req, res) => {
 // username: mdoel-db
 // password: ONX37JFwQpMgjAC6
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = "mongodb+srv://model-db:ONX37JFwQpMgjAC6@cluster0.u7wqc8p.mongodb.net/?appName=Cluster0";
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -37,6 +37,17 @@ async function run() {
             
             res.send(result);
         });
+
+        // findOne
+        app.get('/models/:id', async(req, res) => {
+            const {id} = req.params;
+            console.log(id);
+            const result = await modelCollection.findOne({_id: new ObjectId(id)});
+            res.send({
+                success: true,
+                result
+            })
+        })
 
         // Insert
         app.post('/models', async(req, res) => {
