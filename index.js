@@ -28,6 +28,28 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
+        const db = client.db('model-db');
+        const modelCollection = db.collection('models');
+
+        // Find
+        app.get('/models', async(req, res) => {
+            const result = await modelCollection.find().toArray();
+            
+            res.send(result);
+        });
+
+        // Insert
+        app.post('/models', async(req, res) => {
+            const data = req.body;
+            console.log(data);
+            const result = await modelCollection.insertOne(data);
+            res.send(
+                {
+                    success: true,
+                    result
+                }
+            )
+        });
 
 
 
