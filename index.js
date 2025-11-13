@@ -32,17 +32,17 @@ async function run() {
         const modelCollection = db.collection('models');
 
         // Find
-        app.get('/models', async(req, res) => {
+        app.get('/models', async (req, res) => {
             const result = await modelCollection.find().toArray();
-            
+
             res.send(result);
         });
 
         // findOne
-        app.get('/models/:id', async(req, res) => {
-            const {id} = req.params;
-            console.log(id);
-            const result = await modelCollection.findOne({_id: new ObjectId(id)});
+        app.get('/models/:id', async (req, res) => {
+            const { id } = req.params;
+            // console.log(id);
+            const result = await modelCollection.findOne({ _id: new ObjectId(id) });
             res.send({
                 success: true,
                 result
@@ -50,9 +50,9 @@ async function run() {
         })
 
         // Insert
-        app.post('/models', async(req, res) => {
+        app.post('/models', async (req, res) => {
             const data = req.body;
-            console.log(data);
+            // console.log(data);
             const result = await modelCollection.insertOne(data);
             res.send(
                 {
@@ -61,6 +61,14 @@ async function run() {
                 }
             )
         });
+
+        // latest 6 data find
+        app.get('/latest-properties', async (req, res) => {
+
+            const result = await modelCollection.find().sort({ postedDate: 'desc' }).limit(6).toArray();
+            // console.log(result);
+            res.send(result);
+        })
 
 
 
