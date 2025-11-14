@@ -70,6 +70,13 @@ async function run() {
             res.send(result);
         })
 
+        // My properties
+        app.get('/my-properties', async(req, res) => {
+            const email = req.query.email;
+            const result = await modelCollection.find({userEmail: email}).toArray();
+            res.send(result);
+        })
+
 
 
         // Send a ping to confirm a successful connection
