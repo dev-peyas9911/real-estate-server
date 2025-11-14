@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
+require('dotenv').config();
 
 app.use(cors());
 app.use(express.json());
@@ -10,11 +11,10 @@ app.get('/', (req, res) => {
     res.send('Server is running');
 });
 
-// username: mdoel-db
-// password: ONX37JFwQpMgjAC6
+
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const uri = "mongodb+srv://model-db:ONX37JFwQpMgjAC6@cluster0.u7wqc8p.mongodb.net/?appName=Cluster0";
+const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.u7wqc8p.mongodb.net/?appName=Cluster0`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
     serverApi: {
@@ -116,6 +116,24 @@ async function run() {
         app.get("/my-ratings", async (req, res) => {
             const email = req.query.email;
             const result = await ratingsCollection.find({ reviewerEmail: email }).toArray();
+            res.send(result);
+        });
+
+        // Search and sort functionality
+        app.get("/all-properties", async (req, res) => {
+            const { search, sortBy, order } = req.query;
+            const query = {};
+
+            if (search) {
+                query.propertyName = { $regex: search, $options: "i" }; // case-insensitive search
+            }
+
+            const sortOptions = {};
+            if (sortBy == "postedDate") {
+                sortOptions.postedDate = order === "desc" ? 1 : -1;
+            }
+
+            const result = await modelCollection.find(query).sort(sortOptions).toArray();
             res.send(result);
         });
 
