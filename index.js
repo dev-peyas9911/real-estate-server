@@ -30,6 +30,7 @@ async function run() {
 
         const db = client.db('model-db');
         const modelCollection = db.collection('models');
+        const ratingsCollection = db.collection('ratings');
 
         // Find
         app.get('/models', async (req, res) => {
@@ -96,6 +97,25 @@ async function run() {
             const result = await modelCollection.deleteOne({
                 _id: new ObjectId(id),
             });
+            res.send(result);
+        });
+
+        // ratings functionality
+        app.post("/add-rating", async (req, res) => {
+            const rating = req.body;
+            const result = await ratingsCollection.insertOne(rating);
+            res.send(result);
+        });
+
+        app.get("/ratings/:propertyId", async (req, res) => {
+            const id = req.params.propertyId;
+            const result = await ratingsCollection.find({ propertyId: id }).toArray();
+            res.send(result);
+        });
+
+        app.get("/my-ratings", async (req, res) => {
+            const email = req.query.email;
+            const result = await ratingsCollection.find({ reviewerEmail: email }).toArray();
             res.send(result);
         });
 
