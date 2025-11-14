@@ -71,11 +71,33 @@ async function run() {
         })
 
         // My properties
-        app.get('/my-properties', async(req, res) => {
+        app.get('/my-properties', async (req, res) => {
             const email = req.query.email;
-            const result = await modelCollection.find({userEmail: email}).toArray();
+            const result = await modelCollection.find({ userEmail: email }).toArray();
             res.send(result);
         })
+
+        // Update Property
+        app.put("/update-property/:id", async (req, res) => {
+            const id = req.params.id;
+            const updateData = req.body;
+
+            const result = await modelCollection.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: updateData }
+            );
+
+            res.send(result);
+        });
+
+        // Delete Property
+        app.delete("/delete-property/:id", async (req, res) => {
+            const id = req.params.id;
+            const result = await modelCollection.deleteOne({
+                _id: new ObjectId(id),
+            });
+            res.send(result);
+        });
 
 
 
