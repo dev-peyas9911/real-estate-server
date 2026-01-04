@@ -51,25 +51,73 @@ async function run() {
         })
 
         // Insert
+        // app.post('/models', async (req, res) => {
+        //     const data = req.body;
+        //     // console.log(data);
+        //     const result = await modelCollection.insertOne(data);
+        //     res.send(
+        //         {
+        //             success: true,
+        //             result
+        //         }
+        //     )
+        // });
         app.post('/models', async (req, res) => {
-            const data = req.body;
-            // console.log(data);
-            const result = await modelCollection.insertOne(data);
-            res.send(
-                {
+            try {
+                const data = req.body;
+
+                // ✅ Add postedDate if not provided
+                if (!data.postedDate) {
+                    data.postedDate = new Date();
+                }
+
+                const result = await modelCollection.insertOne(data);
+
+                res.send({
                     success: true,
                     result
-                }
-            )
+                });
+            } catch (error) {
+                console.error(error);
+                res.status(500).send({ success: false, message: 'Server error' });
+            }
         });
 
-        // latest 6 data find
-        app.get('/latest-properties', async (req, res) => {
 
-            const result = await modelCollection.find().sort({ postedDate: 'desc' }).limit(6).toArray();
-            // console.log(result);
-            res.send(result);
-        })
+        // latest 6 data find
+        // app.get('/latest-properties', async (req, res) => {
+
+        //     const result = await modelCollection.find().sort({ id: -1 }).limit(8).toArray();
+        //     // console.log(result);
+        //     res.send(result);
+        // })
+        app.get('/latest-properties', async (req, res) => {
+            try {
+                // 1️⃣ Find documents with postedDate
+                let result = await modelCollection
+                    .find({ postedDate: { $exists: true } })
+                    .sort({ postedDate: -1 })
+                    .limit(8)
+                    .toArray();
+
+                // 2️⃣ If less than 8, fill with other documents without postedDate
+                if (result.length < 8) {
+                    const remaining = 8 - result.length;
+                    const fallback = await modelCollection
+                        .find({ postedDate: { $exists: false } })
+                        .sort({ _id: -1 }) // latest inserted first
+                        .limit(remaining)
+                        .toArray();
+
+                    result = result.concat(fallback);
+                }
+
+                res.send(result);
+            } catch (error) {
+                console.error(error);
+                res.status(500).send({ message: 'Server error' });
+            }
+        });
 
         // My properties
         app.get('/my-properties', async (req, res) => {
